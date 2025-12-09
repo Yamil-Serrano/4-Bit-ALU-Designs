@@ -2,6 +2,9 @@
 
 A **hardware-minimalist 4-bit Arithmetic Logic Unit** built with discrete logic gates, implementing only three fundamental operations to demonstrate **NAND-universality** principles. This ALU showcases how complex computations can be built from simple components, following the philosophy of hardware/software trade-offs in computer architecture.
 
+This was the **original hand-wired model**, built entirely using real ICs, wires, and breadboards.  
+Below is the full documentation of this minimalist ALU — and at the end, you’ll find a section showcasing the **Advanced Carry-Lookahead ALU** based on the same project. 
+
 ## Technical Specifications
 
 ### Core Features
@@ -30,7 +33,7 @@ A **hardware-minimalist 4-bit Arithmetic Logic Unit** built with discrete logic 
 ## Hardware Implementation
 
 ### Circuit Design
-<img width="1269" height="831" alt="Circuit Schematic" src="https://github.com/user-attachments/assets/e758af1f-6e84-41a4-8573-ca7d8a015c2d" />
+<img width="3931" height="2961" alt="Main" src="https://github.com/user-attachments/assets/ea0fbe19-0d4a-4a48-999b-51e0936f0cec" />
 *Complete circuit schematic designed in CircuitVerse*
 
 ## Operation Details
@@ -117,3 +120,43 @@ This project demonstrates fundamental computer architecture concepts:
 2. **Limited Operations**: Only 3 hardware operations
 3. **No Overflow Flag**: Signed overflow detection not implemented
 4. **Manual Testing**: Requires external input/output devices
+
+# Advanced 4-Bit ALU (Carry-Lookahead Architecture)
+
+After the hand-wired model, a second version was engineered using **Carry-Lookahead Logic (CLA)** to dramatically reduce propagation delay. In a ripple-carry adder, each bit must wait for the previous carry — limiting speed. 
+
+<img width="7568" height="4843" alt="Main (1)" src="https://github.com/user-attachments/assets/1d237a8d-5232-4039-a1df-d86160a08bd8" />
+*Complete circuit schematic designed in CircuitVerse*
+
+## Technical Specifications
+Instead of letting each bit wait for the previous carry, the CLA computes all carries in parallel using the classical Generate and Propagate signals:
+
+- Gi = AND(Ai, Bi)
+- Pi = XOR(Ai, Bi)
+
+From these, every carry is derived combinationally:
+
+- C1 = OR( G0, AND(P0, Cin) )
+- C2 = OR( G1, AND(P1, G0), AND(P1, P0, Cin) )
+- C3 = OR( G2, AND(P2, G1), AND(P2, P1, G0), AND(P2, P1, P0, Cin) )
+- C4 = OR( G3, AND(P3, G2), AND(P3, P2, G1), AND(P3, P2, P1, G0), AND(P3, P2, P1, P0, Cin) )
+
+### Benefits of the CLA Design
+- Much faster than ripple-carry  
+- All carries computed in one combinational layer  
+- More scalable (easy to extend to 8 or 16 bits)  
+
+### Additional Logic Operations Added
+The new Architecture also adds three independent logic blocks:
+
+- **NAND**  
+- **NOR**  
+- **XNOR**  
+
+Each implemented with its own dedicated combinational network, separate from the CLA path — similar to real CPU ALU designs.
+
+### FPGA-Oriented Implementation
+While it is *possible* to build this version with discrete chips, it would require a large number of ICs, making it better suited for FPGA synthesis.  
+This "Advanced ALU" will be implemented once the FPGA board arrives :3
+
+---
