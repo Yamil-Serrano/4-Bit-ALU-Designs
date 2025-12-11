@@ -129,7 +129,7 @@ This project demonstrates fundamental computer architecture concepts:
 
 After the hand-wired model, a second version was engineered using **Carry-Lookahead Logic (CLA)** to dramatically reduce propagation delay. In a ripple-carry adder, each bit must wait for the previous carry — limiting speed. 
 
-<img width="7568" height="4843" alt="Main (1)" src="https://github.com/user-attachments/assets/1d237a8d-5232-4039-a1df-d86160a08bd8" />
+<img width="7577" height="4865" alt="Main" src="https://github.com/user-attachments/assets/e9e5bc63-5055-4dbc-ac76-90e643e89c14" />
 *Complete circuit schematic designed in CircuitVerse*
 
 ## Technical Specifications
