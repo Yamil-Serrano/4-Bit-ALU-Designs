@@ -191,7 +191,7 @@ This implementation highlights the practical differences between two hardware pa
 
 ## License
 Licensed under the **Solderpad Hardware License v2.1**.  
-See the [LICENSE](License) file for full terms.
+See the [LICENSE](LICENSE-HARDWARE) file for full terms.
 
 ## Contact
 If you have any questions or suggestions, feel free to reach out:
