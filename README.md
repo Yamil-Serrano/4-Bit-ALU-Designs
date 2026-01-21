@@ -40,7 +40,7 @@ Beyond addition and subtraction, the ALU includes a NAND-based logic path to hig
 ## Hardware Implementation
 
 ### Circuit Design
-<img width="5594" height="3132" alt="Main" src="https://github.com/user-attachments/assets/80fff33b-53a1-4ed3-b62d-c752268a1825" />
+<img width="5541" height="3132" alt="Main" src="https://github.com/user-attachments/assets/34a3aba9-e97e-4b65-85f6-3740afe17b6c" />
 *Complete circuit schematic designed in CircuitVerse*
 
 ## Operation Details
@@ -164,7 +164,7 @@ This updated version of the 4-bit minimalistic ALU introduces expanded operation
 ## Hardware Implementation
 
 ### Circuit Design
-<img width="9225" height="5163" alt="Main_1" src="https://github.com/user-attachments/assets/5fb833e5-f721-467d-8dd9-d20b6a50d5b1" />
+<img width="9201" height="5163" alt="Main_1" src="https://github.com/user-attachments/assets/f700a608-c322-4b8a-8177-0494a9f16111" />
 *Complete circuit schematic designed in CircuitVerse*
 
 ### Operation Details
