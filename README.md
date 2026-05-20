@@ -1,8 +1,8 @@
 # 4-Bit ALU Designs
 
-A collection of 4-bit ALU designs exploring contrasting architectural philosophies, from a minimalist NAND‑universal implementation to a more advanced carry‑lookahead architecture. The first design is a hardware‑minimalist ALU, built entirely with discrete ICs, real wiring, and breadboards. It demonstrates how complete arithmetic and logic behavior can emerge from simple components using NAND universality and ripple‑carry techniques. The second design is a more complete and high‑performance ALU, featuring carry‑lookahead logic (CLA) and additional dedicated logic blocks.
+A collection of 4-bit ALU implementations built entirely from discrete 74HC-series logic ICs. The project begins with a minimal ripple-carry architecture assembled on breadboard, then evolves into an expanded design featuring a 3-bit operation code and a dedicated PCB layout demonstrating how arithmetic and logic operations can be derived from fundamental gate-level building blocks.
 
-# Hardware-Minimalist 4-bit ALU (Ripple-Carry Architecture)
+# Hardware-Minimalist 4-bit ALU
 This ALU represents the most fundamental version of the project: a design built entirely from discrete logic ICs, assembled by hand using breadboards, wiring, and basic digital components. The core idea is to show how a complete arithmetic and logic system can emerge from a minimal set of building blocks, following the principles of NAND universality and simple ripple-carry computation.
 
 At its heart, this design implements a 4-bit ripple-carry adder, where each bit calculates its sum and pass its carry to the next stage. While not the fastest architecture, its transparency makes it highly educational: every step of the computation from XOR-based addition to AND-driven carry generation is physically observable in the circuit.
@@ -32,16 +32,12 @@ Beyond addition and subtraction, the ALU includes a NAND-based logic path to hig
 | **74HC157** | 2:1 Multiplexer | 1        | Operation selection and output routing         |
 | **74HC4002**| Dual 4-Input NOR Gate | 1        | Zero detection             |
 
-
-**Replacement Note:** The previous implementation of the zero-detect flag using a combination of a 74HC04 (Hex Inverter) and a 74HC32 (Quad OR Gate) has been replaced. Zero detection is now implemented with a single 74HC4002 (Dual 4-Input NOR Gate). This change reduces the component count by one integrated circuit, simplifies board layout and interconnections, and directly implements the required logic function in a single, dedicated gate. It improves design efficiency and reliability by eliminating the need to combine basic gates for this specific purpose.
-
 **Total Components:** 9 ICs implementing a complete 4-bit ALU
 
 ## Hardware Implementation
 
 ### Circuit Design
-<img width="5541" height="3132" alt="Main" src="https://github.com/user-attachments/assets/34a3aba9-e97e-4b65-85f6-3740afe17b6c" />
-*Complete circuit schematic designed in CircuitVerse*
+<img width="5983" height="2897" alt="Main" src="https://github.com/user-attachments/assets/386595fb-e17a-4fdd-bfb6-af8aefbc1650" />
 
 ## Operation Details
 
@@ -90,42 +86,11 @@ This project demonstrates fundamental computer architecture concepts:
 4. **Flag-Based Computing**: Essential for conditional operations in CPUs
 5. **Ripple-Carry Design**: Basic but functional adder architecture
 
-### Breadboard Implementation
-![20260106_205412 1](https://github.com/user-attachments/assets/7ed2b303-a01f-4e95-85a2-b13a74bab634)
-*Close-up of the wired implementation — organized chaos, I promise :3*
-
-## Building Your Own
-
-### Components List
-
-| Quantity | Component       | Specification         | Use in ALU                                 |
-| -------- | --------------- | --------------------- | ------------------------------------------ |
-| 4        | 74HC86          | Quad XOR Gate         | Full adder and two's complement            |
-| 2        | 74HC08          | Quad AND Gate         | Carry generation for arithmetic operations |
-| 1        | 74HC00          | Quad NAND Gate        | NAND operation and control logic           |
-| 1        | 74HC157         | 4-bit 2:1 Multiplexer | Operation selection                        |
-| 1        | 74HC4002        | Dual 4-Input NOR Gate | Zero detection                             |
-| 2        | DIP-4P Switches | 4-position DIP switch | Nibble inputs: A (4 bits) and B (4 bits)   |
-| 1        | DIP-2P Switch   | 2-position DIP switch | Operation code selection (OP code)         |
-| 8        | LEDs            | Yellow, 5mm           | ALU Output                                 |
-| 1        | LED             | Green, 5mm            | Zero flag indicator                        |
-| 10       | Resistors       | 330Ω, 1/4W            | Pull down resistors for the DIP switches   |
-| 2        | Breadboards     | 830+ points           | Circuit prototyping                        |
-| 50+      | Jumper wires    | Various colors        | Circuit connections                        |
-| 1        | Power supply    | 5V DC, 1A minimum     | Circuit power supply                       |
-
-### Construction Tips
-1. Start with power distribution (VCC and GND rails)
-2. Implement full adder for one bit first, then replicate bottom-up
-3. Test each operation individually before full integration
-4. Use consistent color coding for signals
-
 ## ⚠️ Known Limitations
 
 1. **Propagation Delay**: Ripple-carry design limits maximum speed
 2. **Limited Operations**: Only 3 hardware operations
 3. **No Overflow Flag**: Signed overflow detection not implemented
-4. **Manual Testing**: Requires external input/output devices
 
 # Hardware-Minimalist 4-bit ALU (Modified 3-bit OP Code)
 
@@ -164,8 +129,24 @@ This updated version of the 4-bit minimalistic ALU introduces expanded operation
 ## Hardware Implementation
 
 ### Circuit Design
-<img width="10443" height="5057" alt="Main_1" src="https://github.com/user-attachments/assets/5832b244-c8ce-4b34-b6e5-f0c41465cb93" />
-*Complete circuit schematic designed in CircuitVerse*
+<img width="10310" height="4993" alt="Main_1" src="https://github.com/user-attachments/assets/c5a1905a-8094-4885-8976-9bc89adcd3a2" />
+
+### PCB Design in Kicad
+<img width="1904" height="1006" alt="image" src="https://github.com/user-attachments/assets/43411e74-117a-4391-be49-2186bcb70619" />
+
+After validating the architecture in simulation, the design was 
+migrated from breadboard to a custom PCB manufactured via JLCPCB. 
+Each IC is paired with a dedicated 100nF ceramic bypass capacitor
+placed directly at the power pins to suppress switching noise. 
+A 100µF bulk electrolytic capacitor stabilizes the 5V supply rail.
+
+### Physical Build
+<img width="1280" height="591" alt="image" src="https://github.com/user-attachments/assets/7ba15a83-eba1-46c5-832e-f99a556a512f" />
+
+## Verification & Test Bench
+
+To validate correct operation across all input combinations, a dedicated test bench was developed using an ESP32 microcontroller. The [`firmware`](./src/tester) exhaustively tests all 256 input combinations (A × B, 0–15) for each of the 8 opcode states, and verifies both output flags across all cases totaling 2,048 flag assertions for the Zero flag alone.
+All five operations passed with 100% accuracy across every input combination. Both the Equal flag and Zero flag returned correct results in every tested case. Results are reported over Serial with ANSI color coding, distinguishing passing opcodes in green from partial matches in yellow. A 20×4 LCD display connected via I2C provides a real-time progress bar during testing and a summary screen upon completion.
 
 ### Operation Details
 
@@ -196,7 +177,7 @@ This updated version of the 4-bit minimalistic ALU introduces expanded operation
 ### Flag Generation (Implemented using **74HC4002**)
 
 * **Zero Flag**: HIGH when ALU output is 0000
-* **Equal Flag**: HIGH when A si equal to B
+* **Equal Flag**: HIGH when A is equal to B
 
 ### Truth Table Examples
 
@@ -209,52 +190,13 @@ This updated version of the 4-bit minimalistic ALU introduces expanded operation
 | 1100    | 1010    | X11 (NOR)  | 0001   | 0    | 0     |
 
 
-# Advanced 4-Bit ALU (Carry-Lookahead Architecture)
-
-After the hand-wired model, a second version was engineered using **Carry-Lookahead Logic (CLA)** to dramatically reduce propagation delay. In a ripple-carry adder, each bit must wait for the previous carry — limiting speed. 
-<img width="8636" height="4843" alt="Main_2" src="https://github.com/user-attachments/assets/d36d8623-fe9f-4c03-9394-7ff118d79f1b" />
-*Complete circuit schematic designed in CircuitVerse*
-
-## Technical Specifications
-Instead of letting each bit wait for the previous carry, the CLA computes all carries in parallel using the classical Generate and Propagate signals:
-
-- Gi = AND(Ai, Bi)
-- Pi = XOR(Ai, Bi)
-
-From these, every carry is derived combinationally:
-
-- C1 = OR( G0, AND(P0, Cin) )
-- C2 = OR( G1, AND(P1, G0), AND(P1, P0, Cin) )
-- C3 = OR( G2, AND(P2, G1), AND(P2, P1, G0), AND(P2, P1, P0, Cin) )
-- C4 = OR( G3, AND(P3, G2), AND(P3, P2, G1), AND(P3, P2, P1, G0), AND(P3, P2, P1, P0, Cin) )
-
-### Benefits of the CLA Design
-- Much faster than ripple-carry  
-- All carries computed in one combinational layer  
-- More scalable (easy to extend to 8 or 16 bits)  
-
-### Additional Logic Operations Added
-The new Architecture also adds three independent logic blocks:
-
-- **NAND**  
-- **NOR**  
-- **XNOR**  
-
-
 # FPGA Implementation: Tang Nano 9K
 This module ports the 4-bit ALU logic from discrete integrated circuits to a programmable Gowin GW1NR-LV9 FPGA on the Sipeed Tang Nano 9K board. This transformation demonstrates a key modern digital design workflow: translating a proven hardware concept into a compact, single-chip solution using Hardware Description Language (HDL). The implementation faithfully replicates the behavior of the original breadboard circuit, providing a direct comparison between discrete and programmable logic.
 
 ## Physical Prototype & Interfacing
 The FPGA interacts with the physical world through a simple, hands-on interface built on a breadboard. This setup mirrors the experience of the discrete version while showcasing the FPGA's role as a universal logic device.
 
-**Input (Switches):**
-A robust pull-down configuration is used for all input pins. The circuit guarantees a definite logic high (1) when the switch is pressed and a solid logic low (0) when released, eliminating floating states.
-
-**Output (LEDs):**
-Output pins drive LEDs in a standard active-high configuration. An illuminated LED represents a logic high (`1`).
-
 ![20251219_232145 1](https://github.com/user-attachments/assets/a3ac4201-116e-4470-bcaf-a03b19d723fd)
-*Tang Nano 9K with input switches and output LEDs.*
 
 ## Design Philosophy & Notes
 - **Architectural Fidelity**: The HDL description was structured to mirror the original ripple-carry data path, providing a clear one-to-one conceptual mapping between the discrete gate-level design and its HDL counterpart.
