@@ -145,7 +145,7 @@ A 100µF bulk electrolytic capacitor stabilizes the 5V supply rail.
 
 ## Verification & Test Bench
 
-To validate correct operation across all input combinations, a dedicated test bench was developed using an ESP32 microcontroller. The [`firmware`](./src/tester) exhaustively tests all 256 input combinations (A × B, 0–15) for each of the 8 opcode states, and verifies both output flags across all cases totaling 2,048 flag assertions for the Zero flag alone.
+To validate correct operation across all input combinations, a dedicated test bench was developed using an ESP32 microcontroller. The [`firmware`](./src/tester/src) exhaustively tests all 256 input combinations (A × B, 0–15) for each of the 8 opcode states, and verifies both output flags across all cases totaling 2,048 flag assertions for the Zero flag alone.
 All five operations passed with 100% accuracy across every input combination. Both the Equal flag and Zero flag returned correct results in every tested case. Results are reported over Serial with ANSI color coding, distinguishing passing opcodes in green from partial matches in yellow. A 20×4 LCD display connected via I2C provides a real-time progress bar during testing and a summary screen upon completion.
 
 ### Operation Details

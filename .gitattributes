@@ -1,0 +1,8 @@
+# C++ test firmware is not the main focus of this repo
+*.cpp linguist-detectable=false
+*.c linguist-detectable=false
+*.h linguist-detectable=false
+
+# Exclude PlatformIO/build generated files
+.pio/** linguist-generated=true
+build/** linguist-generated=true
