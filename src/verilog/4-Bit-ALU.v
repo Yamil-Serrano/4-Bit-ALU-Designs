@@ -1,68 +1,50 @@
-module top (
-    output wire Zero,
-
-    input wire OP_code0,
-    input wire OP_code1,
-
-    input wire bit3A,
-    input wire bit2A,
-    input wire bit1A,
-    input wire bit0A,
-
-    input wire bit3B,
-    input wire bit2B,
-    input wire bit1B,
-    input wire bit0B,
-
-    output wire led0,
-    output wire led1,
-    output wire led2,
-    output wire led3
+module alu_4bit(
+    input  [3:0] A,
+    input  [3:0] B,
+    input  [2:0] OP,
+    output reg [3:0] Result,
+    output Zero,
+    output Carry,
+    output Equal
 );
 
-wire bit0_xor;
-wire bit1_xor;
-wire bit2_xor;
-wire bit3_xor;
+wire [3:0] xor_input;
+wire [3:0] adder_result;
+wire carry_out;
+wire [3:0] nand_result;
+wire [3:0] xor_result;
+wire [3:0] nor_result;
 
-assign bit0_xor = bit0B ^ OP_code1;
-assign bit1_xor = bit1B ^ OP_code1;
-assign bit2_xor = bit2B ^ OP_code1;
-assign bit3_xor = bit3B ^ OP_code1;
+assign nand_result = ~(A & B);      // NAND
+assign xor_result  = A ^ B;          // XOR
+assign nor_result  = ~(A | B);       // NOR
 
-wire adder_bit0; 
-wire adder_bit1;
-wire adder_bit2;
-wire adder_bit3;
+// --- Adder/Subtractor Logic ---
+assign xor_input = B ^ {4{OP[2]}}; // Represents the xor of every full adder that takes B and Opcode[2].
+assign {carry_out, adder_result} = A + xor_input + OP[2]; // Represents the sum of A and B, where B is 
+                                                          // XORed with Opcode[2] to determine if it's 
+                                                          // an addition or subtraction. The carry_out 
+                                                          // is the carry from the most significant bit.
 
-wire carry_out0;
-wire carry_out1;
-wire carry_out2;
-wire carry_out3;
+// --- Multiplexer for Result ---
+always @(*) begin
+    case (OP[1:0])
+        2'b00: begin
+            if (OP[2] == 0)
+                Result = adder_result;    // SUM
+            else
+                Result = adder_result;    // SUB
+        end
+        
+        2'b01: Result = nand_result;     // NAND
+        2'b10: Result = xor_result;      // XOR
+        2'b11: Result = nor_result;      // NOR
+    endcase
+end
 
-// 4-Bit full adder
-assign adder_bit0  = bit0A ^ bit0_xor ^ OP_code1;
-assign carry_out0  = (bit0A & bit0_xor) | (OP_code1 & (bit0A ^ bit0_xor));
-assign adder_bit1  = bit1A ^ bit1_xor ^ carry_out0;
-assign carry_out1  = (bit1A & bit1_xor) | (carry_out0 & (bit1A ^ bit1_xor));
-assign adder_bit2  = bit2A ^ bit2_xor ^ carry_out1;
-assign carry_out2  = (bit2A & bit2_xor) | (carry_out1 & (bit2A ^ bit2_xor));
-assign adder_bit3  = bit3A ^ bit3_xor ^ carry_out2;
-assign carry_out3  = (bit3A & bit3_xor) | (carry_out2 & (bit3A ^ bit3_xor));
-
-// Mux Nand and Adder
-assign output0 = ((~(bit0A & bit0B) & ~(OP_code0) & 1) | (adder_bit0 & OP_code0 & 1));
-assign output1 = ((~(bit1A & bit1B) & ~(OP_code0) & 1) | (adder_bit1 & OP_code0 & 1));
-assign output2 = ((~(bit2A & bit2B) & ~(OP_code0) & 1) | (adder_bit2 & OP_code0 & 1));
-assign output3 = ((~(bit3A & bit3B) & ~(OP_code0) & 1) | (adder_bit3 & OP_code0 & 1));
-
-// Output
-assign led0 = output0;
-assign led1 = output1;
-assign led2 = output2;
-assign led3 = output3;
-
-// Zero flag
-assign Zero = ~(output0 | output1 | output2 | output3);
+// --- Flags ---
+assign Zero  = (Result == 4'b0);
+assign Carry = carry_out;
+assign Equal = (A == B);
 
 endmodule
