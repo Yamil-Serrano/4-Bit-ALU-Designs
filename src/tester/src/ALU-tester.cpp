@@ -1,10 +1,11 @@
 #include <Arduino.h>
 #include <Wire.h>
-#include <LiquidCrystal_I2C.h>
+// #include <LiquidCrystal_I2C.h>
 
 // Follow your ALU design and pinout to update these arrays if needed
-// Current pin setup assumes Minimalistic 4-Bit ALU Modified 3-Bit OPP Code | Rev. 3.2
+// Current pin setup assumes Minimalistic 4-Bit ALU Modified 3-Bit OPP Code | Rev. 3.2[[ ]]
 
+// For ESP32
 const int PIN_A[] = {15, 2, 4, 16};        // Nibble A [LSB to MSB]
 const int PIN_B[] = {17, 5, 18, 19};       // Nibble B [LSB to MSB]
 const int PIN_RESULT[] = {13, 12, 14, 27}; // ALU output [LSB to MSB]
@@ -12,12 +13,20 @@ const int PIN_OPCODE[] = {32, 33, 21};     // Opcode [LSB to MSB]
 const int PIN_FLAG_EQ = 26;
 const int PIN_FLAG_ZR = 25;
 
+// For Arduino Uno
+// const int PIN_A[]      = {2, 3, 4, 5};      // Nibble A [LSB to MSB]
+// const int PIN_B[]      = {6, 7, 8, 9};      // Nibble B [LSB to MSB]
+// const int PIN_RESULT[] = {10, 11, 12, 13};  // ALU output [LSB to MSB]
+// const int PIN_OPCODE[] = {A0, A1, A2};      // Opcode [LSB to MSB]
+// const int PIN_FLAG_EQ  = A3;
+// const int PIN_FLAG_ZR  = A4;
+
 // ANSI Color Codes
 #define ANSI_GREEN "\033[32m"
 #define ANSI_YELLOW "\033[33m"
 #define ANSI_RESET "\033[0m"
 
-LiquidCrystal_I2C lcd(0x27, 20, 4);
+// LiquidCrystal_I2C lcd(0x27, 20, 4);
 
 // Operation Definitions
 typedef byte (*OpFunc)(byte, byte);
@@ -128,7 +137,7 @@ byte readResult()
 void testOpcode(int opcode)
 {
   setOpcode(opcode);
-  delayMicroseconds(1);
+  delayMicroseconds(5);
 
   OpFunc expectedFunc = getOpFunc(opcode);
   const char *expectedName = getOpName(opcode);
@@ -139,7 +148,7 @@ void testOpcode(int opcode)
     for (byte b = 0; b < 16; b++)
     {
       setInputs(a, b);
-      delayMicroseconds(1);
+      delayMicroseconds(5);
       if (readResult() == expectedFunc(a, b))
         hits++;
     }
@@ -153,13 +162,13 @@ FlagResult testEqualFlag()
 {
   int hits = 0;
   setOpcode(0);
-  delayMicroseconds(1);
+  delayMicroseconds(5);
   for (byte a = 0; a < 16; a++)
   {
     for (byte b = 0; b < 16; b++)
     {
       setInputs(a, b);
-      delayMicroseconds(1);
+      delayMicroseconds(5);
       if ((bool)digitalRead(PIN_FLAG_EQ) == (a == b))
         hits++;
     }
@@ -173,14 +182,14 @@ FlagResult testZeroFlag()
   for (int op = 0; op < 8; op++)
   {
     setOpcode(op);
-    delayMicroseconds(1);
+    delayMicroseconds(5);
     OpFunc func = getOpFunc(op);
     for (byte a = 0; a < 16; a++)
     {
       for (byte b = 0; b < 16; b++)
       {
         setInputs(a, b);
-        delayMicroseconds(1);
+        delayMicroseconds(5);
         bool expected = (func(a, b) == 0x00);
         if ((bool)digitalRead(PIN_FLAG_ZR) == expected)
           hits++;
@@ -325,23 +334,17 @@ void setup()
   Serial.begin(9600);
 
   // LCD Boot Screen
-  Wire.begin(22, 23);
-
-  lcd.init();
-  lcd.backlight();
-
-  lcd.clear();
-
-  lcd.setCursor(0, 0);
-  lcd.print("   Hardware Bench");
-
-  lcd.setCursor(0, 1);
-  lcd.print("   Initializing");
-
-  lcd.setCursor(0, 3);
-  lcd.print(" Made by: Neowizen");
-
-  delay(500);
+  // Wire.begin();
+  // lcd.init();
+  // lcd.backlight();
+  // lcd.clear();
+  // lcd.setCursor(0, 0);
+  // lcd.print("   Hardware Bench");
+  // lcd.setCursor(0, 1);
+  // lcd.print("   Initializing");
+  // lcd.setCursor(0, 3);
+  // lcd.print(" Made by: Neowizen");
+  // delay(500);
 
   for (int i = 0; i < 4; i++)
   {
@@ -380,13 +383,12 @@ void setup()
     Serial.println(")");
 
     // LCD Real-Time Progress
-    int progress = map(op + 1, 0, 8, 1, 18);
-
-    for (int i = 1; i <= progress; i++)
-    {
-      lcd.setCursor(i, 2);
-      lcd.print((char)255);
-    }
+    // int progress = map(op + 1, 0, 8, 1, 18);
+    // for (int i = 1; i <= progress; i++)
+    // {
+    //   lcd.setCursor(i, 2);
+    //   lcd.print((char)255);
+    // }
   }
 
   FlagResult eqResult = testEqualFlag();
@@ -395,40 +397,29 @@ void setup()
   printReport(eqResult, zrResult);
 
   // LCD Final Report
-
-  int perfect = 0;
-
-  for (int op = 0; op < 8; op++)
-  {
-    if (results[op].pct == 100.0f)
-      perfect++;
-  }
-
-  lcd.clear();
-
-  // Calculate average accuracy
-  float totalPct = 0.0f;
-
-  for (int op = 0; op < 8; op++)
-  {
-    totalPct += results[op].pct;
-  }
-
-  float avgPct = totalPct / 8.0f;
-
-  lcd.setCursor(0, 0);
-  lcd.print("   TEST COMPLETED");
-
-  lcd.setCursor(0, 1);
-  lcd.print("   Result: ");
-  lcd.print(avgPct, 1);
-  lcd.print("%");
-
-  lcd.setCursor(0, 2);
-  lcd.print(" More bench details");
-
-  lcd.setCursor(0, 3);
-  lcd.print(" in Serial Terminal");
+  // int perfect = 0;
+  // for (int op = 0; op < 8; op++)
+  // {
+  //   if (results[op].pct == 100.0f)
+  //     perfect++;
+  // }
+  // lcd.clear();
+  // float totalPct = 0.0f;
+  // for (int op = 0; op < 8; op++)
+  // {
+  //   totalPct += results[op].pct;
+  // }
+  // float avgPct = totalPct / 8.0f;
+  // lcd.setCursor(0, 0);
+  // lcd.print("   TEST COMPLETED");
+  // lcd.setCursor(0, 1);
+  // lcd.print("   Result: ");
+  // lcd.print(avgPct, 1);
+  // lcd.print("%");
+  // lcd.setCursor(0, 2);
+  // lcd.print(" More bench details");
+  // lcd.setCursor(0, 3);
+  // lcd.print(" in Serial Terminal");
 }
 
 void loop() { delay(200); }
