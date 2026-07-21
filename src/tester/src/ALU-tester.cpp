@@ -1,17 +1,17 @@
 #include <Arduino.h>
 #include <Wire.h>
-// #include <LiquidCrystal_I2C.h>
+#include <LiquidCrystal_I2C.h>
 
 // Follow your ALU design and pinout to update these arrays if needed
 // Current pin setup assumes Minimalistic 4-Bit ALU Modified 3-Bit OPP Code | Rev. 3.2[[ ]]
 
 // For ESP32
-const int PIN_A[] = {15, 2, 4, 16};        // Nibble A [LSB to MSB]
-const int PIN_B[] = {17, 5, 18, 19};       // Nibble B [LSB to MSB]
-const int PIN_RESULT[] = {13, 12, 14, 27}; // ALU output [LSB to MSB]
-const int PIN_OPCODE[] = {32, 33, 21};     // Opcode [LSB to MSB]
-const int PIN_FLAG_EQ = 26;
-const int PIN_FLAG_ZR = 25;
+const int PIN_A[] = {26, 25, 33, 32};         // Nibble A [LSB to MSB]
+const int PIN_B[] = {4, 16, 17, 5};           // Nibble B [LSB to MSB]
+const int PIN_OPCODE[] = {13, 14, 27};        // Opcode [LSB to MSB]
+const int PIN_RESULT[] = {18, 19, 35, 34};    // ALU output [LSB to MSB]
+const int PIN_FLAG_EQ = 15;
+const int PIN_FLAG_ZR = 2;
 
 // For Arduino Uno
 // const int PIN_A[]      = {2, 3, 4, 5};      // Nibble A [LSB to MSB]
@@ -26,7 +26,7 @@ const int PIN_FLAG_ZR = 25;
 #define ANSI_YELLOW "\033[33m"
 #define ANSI_RESET "\033[0m"
 
-// LiquidCrystal_I2C lcd(0x27, 20, 4);
+LiquidCrystal_I2C lcd(0x27, 20, 4);
 
 // Operation Definitions
 typedef byte (*OpFunc)(byte, byte);
@@ -334,17 +334,17 @@ void setup()
   Serial.begin(9600);
 
   // LCD Boot Screen
-  // Wire.begin();
-  // lcd.init();
-  // lcd.backlight();
-  // lcd.clear();
-  // lcd.setCursor(0, 0);
-  // lcd.print("   Hardware Bench");
-  // lcd.setCursor(0, 1);
-  // lcd.print("   Initializing");
-  // lcd.setCursor(0, 3);
-  // lcd.print(" Made by: Neowizen");
-  // delay(500);
+  Wire.begin();
+  lcd.init();
+  lcd.backlight();
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("   Hardware Bench");
+  lcd.setCursor(0, 1);
+  lcd.print("   Initializing");
+  lcd.setCursor(0, 3);
+  lcd.print(" Made by: Neowizen");
+  delay(500);
 
   for (int i = 0; i < 4; i++)
   {
@@ -383,12 +383,12 @@ void setup()
     Serial.println(")");
 
     // LCD Real-Time Progress
-    // int progress = map(op + 1, 0, 8, 1, 18);
-    // for (int i = 1; i <= progress; i++)
-    // {
-    //   lcd.setCursor(i, 2);
-    //   lcd.print((char)255);
-    // }
+    int progress = map(op + 1, 0, 8, 1, 18);
+    for (int i = 1; i <= progress; i++)
+    {
+      lcd.setCursor(i, 2);
+      lcd.print((char)255);
+    }
   }
 
   FlagResult eqResult = testEqualFlag();
@@ -397,29 +397,29 @@ void setup()
   printReport(eqResult, zrResult);
 
   // LCD Final Report
-  // int perfect = 0;
-  // for (int op = 0; op < 8; op++)
-  // {
-  //   if (results[op].pct == 100.0f)
-  //     perfect++;
-  // }
-  // lcd.clear();
-  // float totalPct = 0.0f;
-  // for (int op = 0; op < 8; op++)
-  // {
-  //   totalPct += results[op].pct;
-  // }
-  // float avgPct = totalPct / 8.0f;
-  // lcd.setCursor(0, 0);
-  // lcd.print("   TEST COMPLETED");
-  // lcd.setCursor(0, 1);
-  // lcd.print("   Result: ");
-  // lcd.print(avgPct, 1);
-  // lcd.print("%");
-  // lcd.setCursor(0, 2);
-  // lcd.print(" More bench details");
-  // lcd.setCursor(0, 3);
-  // lcd.print(" in Serial Terminal");
+  int perfect = 0;
+  for (int op = 0; op < 8; op++)
+  {
+    if (results[op].pct == 100.0f)
+      perfect++;
+  }
+  lcd.clear();
+  float totalPct = 0.0f;
+  for (int op = 0; op < 8; op++)
+  {
+    totalPct += results[op].pct;
+  }
+  float avgPct = totalPct / 8.0f;
+  lcd.setCursor(0, 0);
+  lcd.print("   TEST COMPLETED");
+  lcd.setCursor(0, 1);
+  lcd.print("   Result: ");
+  lcd.print(avgPct, 1);
+  lcd.print("%");
+  lcd.setCursor(0, 2);
+  lcd.print(" More bench details");
+  lcd.setCursor(0, 3);
+  lcd.print(" in Serial Terminal");
 }
 
 void loop() { delay(200); }
